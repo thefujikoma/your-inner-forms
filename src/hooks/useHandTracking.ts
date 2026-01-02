@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Hands, Results } from '@mediapipe/hands';
-import { Camera } from '@mediapipe/camera_utils';
+import { FilesetResolver, HandLandmarker, HandLandmarkerResult } from '@mediapipe/tasks-vision';
 
 export interface HandLandmark {
   x: number;
@@ -23,88 +22,134 @@ export function useHandTracking(videoRef: React.RefObject<HTMLVideoElement>) {
     error: null,
   });
 
-  const handsRef = useRef<Hands | null>(null);
-  const cameraRef = useRef<Camera | null>(null);
+  const handLandmarkerRef = useRef<HandLandmarker | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
-  const onResults = useCallback((results: Results) => {
-    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-      const landmarks = results.multiHandLandmarks[0].map((lm) => ({
-        x: lm.x,
-        y: lm.y,
-        z: lm.z,
-      }));
-      setState((prev) => ({
-        ...prev,
-        isTracking: true,
-        landmarks,
-      }));
-    } else {
-      setState((prev) => ({
-        ...prev,
-        isTracking: false,
-        landmarks: null,
-      }));
+  const processFrame = useCallback(() => {
+    if (!handLandmarkerRef.current || !videoRef.current) {
+      animationFrameRef.current = requestAnimationFrame(processFrame);
+      return;
     }
-  }, []);
+
+    const video = videoRef.current;
+    
+    if (video.readyState >= 2) {
+      try {
+        const results: HandLandmarkerResult = handLandmarkerRef.current.detectForVideo(
+          video,
+          performance.now()
+        );
+
+        if (results.landmarks && results.landmarks.length > 0) {
+          const landmarks = results.landmarks[0].map((lm) => ({
+            x: lm.x,
+            y: lm.y,
+            z: lm.z,
+          }));
+          setState((prev) => ({
+            ...prev,
+            isTracking: true,
+            landmarks,
+          }));
+        } else {
+          setState((prev) => ({
+            ...prev,
+            isTracking: false,
+            landmarks: null,
+          }));
+        }
+      } catch (error) {
+        console.error('Detection error:', error);
+      }
+    }
+
+    animationFrameRef.current = requestAnimationFrame(processFrame);
+  }, [videoRef]);
 
   const initializeTracking = useCallback(async () => {
     if (!videoRef.current) return;
 
     try {
-      const hands = new Hands({
-        locateFile: (file) => {
-          return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+      // Request camera access first
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
         },
       });
 
-      hands.setOptions({
-        maxNumHands: 1,
-        modelComplexity: 1,
-        minDetectionConfidence: 0.7,
+      streamRef.current = stream;
+      videoRef.current.srcObject = stream;
+      
+      await new Promise<void>((resolve) => {
+        if (videoRef.current) {
+          videoRef.current.onloadedmetadata = () => {
+            videoRef.current?.play();
+            resolve();
+          };
+        }
+      });
+
+      // Initialize MediaPipe HandLandmarker
+      const vision = await FilesetResolver.forVisionTasks(
+        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
+      );
+
+      const handLandmarker = await HandLandmarker.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
+          delegate: 'GPU',
+        },
+        runningMode: 'VIDEO',
+        numHands: 1,
+        minHandDetectionConfidence: 0.5,
+        minHandPresenceConfidence: 0.5,
         minTrackingConfidence: 0.5,
       });
 
-      hands.onResults(onResults);
-      handsRef.current = hands;
-
-      const camera = new Camera(videoRef.current, {
-        onFrame: async () => {
-          if (handsRef.current && videoRef.current) {
-            await handsRef.current.send({ image: videoRef.current });
-          }
-        },
-        width: 1280,
-        height: 720,
-        facingMode: 'environment',
-      });
-
-      cameraRef.current = camera;
-      await camera.start();
+      handLandmarkerRef.current = handLandmarker;
 
       setState((prev) => ({
         ...prev,
         isLoading: false,
         error: null,
       }));
+
+      // Start processing frames
+      processFrame();
     } catch (error) {
       console.error('Hand tracking initialization error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to initialize';
+      
+      let userMessage = 'Failed to initialize camera or hand tracking';
+      if (errorMessage.includes('Permission denied') || errorMessage.includes('NotAllowedError')) {
+        userMessage = 'Camera access denied. Please allow camera access and reload.';
+      } else if (errorMessage.includes('NotFoundError')) {
+        userMessage = 'No camera found. Please connect a camera.';
+      }
+      
       setState((prev) => ({
         ...prev,
         isLoading: false,
-        error: 'Failed to initialize camera or hand tracking',
+        error: userMessage,
       }));
     }
-  }, [videoRef, onResults]);
+  }, [videoRef, processFrame]);
 
   useEffect(() => {
     initializeTracking();
 
     return () => {
-      if (cameraRef.current) {
-        cameraRef.current.stop();
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
       }
-      if (handsRef.current) {
-        handsRef.current.close();
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      }
+      if (handLandmarkerRef.current) {
+        handLandmarkerRef.current.close();
       }
     };
   }, [initializeTracking]);
