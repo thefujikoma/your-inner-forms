@@ -57,6 +57,14 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        bone: {
+          humerus: "hsl(var(--bone-humerus))",
+          radius: "hsl(var(--bone-radius))",
+          ulna: "hsl(var(--bone-ulna))",
+          carpals: "hsl(var(--bone-carpals))",
+          metacarpals: "hsl(var(--bone-metacarpals))",
+          phalanges: "hsl(var(--bone-phalanges))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
