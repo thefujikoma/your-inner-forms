@@ -1,0 +1,60 @@
+import { X } from 'lucide-react';
+
+interface CreditsOverlayProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function CreditsOverlay({ isOpen, onClose }: CreditsOverlayProps) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="absolute inset-0 z-50 flex items-center justify-center p-6">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      
+      {/* Panel */}
+      <div className="relative w-full max-w-sm bg-card border border-border rounded-2xl p-6 fade-in">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-foreground tracking-wide">
+            Your Inner Hand
+          </h3>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors"
+          >
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+        
+        {/* Content */}
+        <div className="space-y-4 text-sm text-muted-foreground">
+          <p>
+            This AR experience reveals the deep evolutionary history hidden within your hand. 
+            The same bones that form your fingers also appear in fish fins, bat wings, and 
+            tortoise limbs—evidence of our shared ancestry across hundreds of millions of years.
+          </p>
+          
+          <div className="pt-4 border-t border-border">
+            <p className="text-xs text-muted-foreground/70">
+              Hand tracking powered by MediaPipe
+            </p>
+            <p className="text-xs text-muted-foreground/70 mt-1">
+              3D rendering with Three.js
+            </p>
+          </div>
+          
+          <div className="pt-4 border-t border-border text-center">
+            <p className="text-xs text-primary">
+              Designed for Educational Use
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
