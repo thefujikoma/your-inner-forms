@@ -10,15 +10,6 @@ export interface Species {
 
 export const SPECIES_DATA: Species[] = [
   {
-    id: 'tiktaalik',
-    commonName: 'Tiktaalik',
-    scientificName: 'Tiktaalik roseae',
-    group: 'Transitional fish–tetrapod',
-    timePeriod: '~375 million years ago',
-    whyItMatters: 'Tiktaalik represents a pivotal moment in vertebrate history. Its fin contains bones arranged like a limb, capable of supporting weight. This structure foreshadows the forelimbs of all land vertebrates—including your hand.',
-    keyIdea: 'This is where fins began behaving like arms.',
-  },
-  {
     id: 'coelacanth',
     commonName: 'Coelacanth',
     scientificName: 'Latimeria chalumnae',
@@ -26,6 +17,15 @@ export const SPECIES_DATA: Species[] = [
     timePeriod: '~400 million years ago (lineage)',
     whyItMatters: 'Coelacanths possess fleshy, lobed fins with internal bones that resemble the early blueprint of limbs. These structures show that the foundations of arms and hands evolved long before animals left the water.',
     keyIdea: "Limbs didn't appear suddenly—they were already hiding in fins.",
+  },
+  {
+    id: 'tiktaalik',
+    commonName: 'Tiktaalik',
+    scientificName: 'Tiktaalik roseae',
+    group: 'Transitional fish–tetrapod',
+    timePeriod: '~375 million years ago',
+    whyItMatters: 'Tiktaalik represents a pivotal moment in vertebrate history. Its fin contains bones arranged like a limb, capable of supporting weight. This structure foreshadows the forelimbs of all land vertebrates—including your hand.',
+    keyIdea: 'This is where fins began behaving like arms.',
   },
   {
     id: 'hairyfrog',
@@ -36,12 +36,12 @@ export const SPECIES_DATA: Species[] = [
     keyIdea: 'The same bones now solve two worlds: water and land.',
   },
   {
-    id: 'bat',
-    commonName: 'Bat',
-    scientificName: 'Desmodus rotundus',
-    group: 'Mammal',
-    whyItMatters: 'Bat wings are built from the same bones found in the human hand—but stretched and reshaped to support flight. The fingers become the structure itself, demonstrating how evolution repurposes existing anatomy for entirely new functions.',
-    keyIdea: "Flight didn't require new bones—just new proportions.",
+    id: 'tortoise',
+    commonName: 'Tortoise',
+    scientificName: 'Terrapene carolina',
+    group: 'Reptile',
+    whyItMatters: 'Tortoise forelimbs are modified for stability and support. While the same core bones remain, they are shortened and reinforced to suit a life built around protection, weight-bearing, and slow, deliberate movement.',
+    keyIdea: 'Sometimes evolution favors strength over speed.',
   },
   {
     id: 'rat',
@@ -52,12 +52,12 @@ export const SPECIES_DATA: Species[] = [
     keyIdea: 'This is the versatile default—adaptable, efficient, familiar.',
   },
   {
-    id: 'tortoise',
-    commonName: 'Tortoise',
-    scientificName: 'Terrapene carolina',
-    group: 'Reptile',
-    whyItMatters: 'Tortoise forelimbs are modified for stability and support. While the same core bones remain, they are shortened and reinforced to suit a life built around protection, weight-bearing, and slow, deliberate movement.',
-    keyIdea: 'Sometimes evolution favors strength over speed.',
+    id: 'bat',
+    commonName: 'Bat',
+    scientificName: 'Desmodus rotundus',
+    group: 'Mammal',
+    whyItMatters: 'Bat wings are built from the same bones found in the human hand—but stretched and reshaped to support flight. The fingers become the structure itself, demonstrating how evolution repurposes existing anatomy for entirely new functions.',
+    keyIdea: "Flight didn't require new bones—just new proportions.",
   },
 ];
 
