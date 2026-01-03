@@ -8,7 +8,7 @@ import { BoneKeyOverlay } from './BoneKeyOverlay';
 import { CreditsOverlay } from './CreditsOverlay';
 import { AnimalDetailDrawer } from './AnimalDetailDrawer';
 import { SPECIES_DATA, Species, BONE_GROUPS } from '@/types/species';
-import { Info, ChevronDown, Hand, Move3D } from 'lucide-react';
+import { Info, ChevronDown, Hand, Move3D, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import * as THREE from 'three';
 
@@ -162,8 +162,16 @@ export function FreeExploreView() {
         <span className="text-xs text-muted-foreground">Try Hand Mode</span>
       </button>
       
+      {/* Home Button */}
+      <button
+        onClick={() => navigate('/')}
+        className="absolute top-4 left-4 w-10 h-10 rounded-full bg-secondary/80 backdrop-blur-sm flex items-center justify-center border border-border/50 hover:bg-secondary transition-colors z-10"
+      >
+        <Home className="w-5 h-5 text-muted-foreground" />
+      </button>
+      
       {/* Species Info Display */}
-      <div className="absolute top-4 left-4 z-10">
+      <div className="absolute top-16 left-4 z-10">
         <button
           onClick={() => setShowDetail(true)}
           className="bg-card/80 backdrop-blur-sm rounded-lg px-4 py-3 border border-border/50 text-left hover:bg-card/90 transition-colors group"
