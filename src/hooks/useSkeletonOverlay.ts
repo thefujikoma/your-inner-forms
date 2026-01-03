@@ -72,11 +72,6 @@ export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath,
 
     window.addEventListener('resize', handleResize);
 
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      renderer.dispose();
-      scene.clear();
-    };
     // Initialize GLTF loader
     loaderRef.current = new GLTFLoader();
 
