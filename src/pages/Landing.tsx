@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Hand, Move3D, Bone, ArrowRight } from "lucide-react";
+import SilhouetteShowcase from "@/components/SilhouetteShowcase";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -23,6 +24,9 @@ export default function Landing() {
 
         <p className="text-xl font-semibold text-primary">Different animals. Same bones.</p>
       </section>
+
+      {/* Silhouette Showcase */}
+      <SilhouetteShowcase />
 
       {/* Mode Selection */}
       <section className="px-6 py-12">
