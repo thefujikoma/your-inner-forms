@@ -8,9 +8,11 @@ import { BoneKeyOverlay } from './BoneKeyOverlay';
 import { CreditsOverlay } from './CreditsOverlay';
 import { AnimalDetailDrawer } from './AnimalDetailDrawer';
 import { SPECIES_DATA, Species } from '@/types/species';
-import { Info, ChevronDown } from 'lucide-react';
+import { Info, ChevronDown, Move3D } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export function CameraView() {
+  const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
@@ -99,6 +101,15 @@ export function CameraView() {
       
       {/* Instruction Overlay */}
       <InstructionOverlay visible={showInstruction && !isLoading && !error} />
+      
+      {/* Mode Switch Button */}
+      <button
+        onClick={() => navigate('/explore?mode=free')}
+        className="absolute top-4 right-16 h-10 px-3 rounded-full bg-secondary/80 backdrop-blur-sm flex items-center gap-2 border border-border/50 hover:bg-secondary transition-colors z-10"
+      >
+        <Move3D className="w-4 h-4 text-muted-foreground" />
+        <span className="text-xs text-muted-foreground">Free Explore</span>
+      </button>
       
       {/* Top Info Button */}
       <button
