@@ -7,9 +7,6 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-y-auto">
-      {/* Silhouette Showcase */}
-      <SilhouetteShowcase />
-
       {/* Hero Section */}
       <section className="relative flex flex-col items-center justify-center px-6 pt-12 pb-6 text-center">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
@@ -27,6 +24,9 @@ export default function Landing() {
 
         <p className="text-xl font-semibold text-primary">Different animals. Same bones.</p>
       </section>
+
+      {/* Silhouette Showcase */}
+      <SilhouetteShowcase />
 
       {/* Mode Selection */}
       <section className="px-6 pt-6 pb-12">
