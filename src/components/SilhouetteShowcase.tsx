@@ -34,7 +34,7 @@ export default function SilhouetteShowcase() {
   }, []);
 
   return (
-    <div className="flex justify-center px-6 py-8">
+    <div className="flex justify-center px-6 py-4">
       <div
         className="relative flex items-center justify-center rounded-3xl bg-primary/30 border border-primary/40"
         style={{

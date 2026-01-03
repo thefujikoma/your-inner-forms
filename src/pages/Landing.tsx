@@ -8,7 +8,7 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-background text-foreground overflow-y-auto">
       {/* Hero Section */}
-      <section className="relative min-h-[60vh] flex flex-col items-center justify-center px-6 py-12 text-center">
+      <section className="relative flex flex-col items-center justify-center px-6 pt-12 pb-6 text-center">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
 
         <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">Your Inner Forms</h1>
@@ -29,7 +29,7 @@ export default function Landing() {
       <SilhouetteShowcase />
 
       {/* Mode Selection */}
-      <section className="px-6 py-12">
+      <section className="px-6 pt-6 pb-12">
         <h2 className="text-2xl font-bold text-center mb-8">Choose How to Explore</h2>
 
         <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
