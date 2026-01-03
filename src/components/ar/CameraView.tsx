@@ -6,8 +6,9 @@ import { InstructionOverlay } from './InstructionOverlay';
 import { InsightMoment } from './InsightMoment';
 import { BoneKeyOverlay } from './BoneKeyOverlay';
 import { CreditsOverlay } from './CreditsOverlay';
+import { AnimalDetailDrawer } from './AnimalDetailDrawer';
 import { SPECIES_DATA, Species } from '@/types/species';
-import { Info } from 'lucide-react';
+import { Info, ChevronDown } from 'lucide-react';
 
 export function CameraView() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -18,6 +19,7 @@ export function CameraView() {
   const [hasInteracted, setHasInteracted] = useState(false);
   const [showBoneKey, setShowBoneKey] = useState(false);
   const [showCredits, setShowCredits] = useState(false);
+  const [showDetail, setShowDetail] = useState(false);
   
   const { isLoading, isTracking, landmarks, error } = useHandTracking(videoRef);
   
@@ -108,17 +110,21 @@ export function CameraView() {
       
       {/* Species Info Display */}
       <div className="absolute top-4 left-4 z-10">
-        <div className="bg-card/80 backdrop-blur-sm rounded-lg px-4 py-3 border border-border/50">
-          <p className="text-xs text-primary tracking-widest uppercase">
-            {selectedSpecies.category}
-          </p>
+        <button
+          onClick={() => setShowDetail(true)}
+          className="bg-card/80 backdrop-blur-sm rounded-lg px-4 py-3 border border-border/50 text-left hover:bg-card/90 transition-colors group"
+        >
           <h2 className="text-xl font-bold text-foreground tracking-tight">
             {selectedSpecies.commonName}
           </h2>
-          <p className="text-sm text-primary/80 italic">
-            {selectedSpecies.description}
+          <p className="text-sm text-muted-foreground italic">
+            {selectedSpecies.scientificName}
           </p>
-        </div>
+          <div className="flex items-center gap-1 mt-1 text-xs text-primary">
+            <span>More info</span>
+            <ChevronDown className="w-3 h-3 group-hover:translate-y-0.5 transition-transform" />
+          </div>
+        </button>
       </div>
       
       {/* Tracking Indicator */}
@@ -156,6 +162,13 @@ export function CameraView() {
       <CreditsOverlay 
         isOpen={showCredits} 
         onClose={() => setShowCredits(false)} 
+      />
+      
+      {/* Animal Detail Drawer */}
+      <AnimalDetailDrawer
+        species={selectedSpecies}
+        isOpen={showDetail}
+        onClose={() => setShowDetail(false)}
       />
     </div>
   );
