@@ -29,6 +29,8 @@ export function CameraView() {
     canvasRef,
     landmarks,
     speciesId: selectedSpecies.id,
+    modelPath: selectedSpecies.modelPath,
+    modelScale: 0.3, // Adjust this value if model is too large/small
   });
 
   // Hide instruction after hand is detected

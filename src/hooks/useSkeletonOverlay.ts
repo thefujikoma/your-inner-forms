@@ -1,18 +1,24 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { HandLandmark } from './useHandTracking';
 
 interface SkeletonOverlayProps {
   canvasRef: React.RefObject<HTMLCanvasElement>;
   landmarks: HandLandmark[] | null;
   speciesId: string;
+  modelPath?: string;
+  modelScale?: number;
 }
 
-export function useSkeletonOverlay({ canvasRef, landmarks, speciesId }: SkeletonOverlayProps) {
+export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath, modelScale = 0.3 }: SkeletonOverlayProps) {
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.OrthographicCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const skeletonGroupRef = useRef<THREE.Group | null>(null);
+  const modelRef = useRef<THREE.Group | null>(null);
+  const loaderRef = useRef<GLTFLoader | null>(null);
+  const loadedModelPathRef = useRef<string | null>(null);
 
   // Initialize Three.js scene
   useEffect(() => {
@@ -71,13 +77,104 @@ export function useSkeletonOverlay({ canvasRef, landmarks, speciesId }: Skeleton
       renderer.dispose();
       scene.clear();
     };
+    // Initialize GLTF loader
+    loaderRef.current = new GLTFLoader();
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      renderer.dispose();
+      scene.clear();
+    };
   }, [canvasRef]);
 
-  // Update skeleton based on hand landmarks
+  // Load GLB model when modelPath changes
   useEffect(() => {
-    if (!skeletonGroupRef.current || !landmarks) return;
+    if (!sceneRef.current || !modelPath || !loaderRef.current) return;
+    
+    // Skip if already loaded this model
+    if (loadedModelPathRef.current === modelPath && modelRef.current) return;
+    
+    const scene = sceneRef.current;
+    const loader = loaderRef.current;
+    
+    // Remove previous model if exists
+    if (modelRef.current) {
+      scene.remove(modelRef.current);
+      modelRef.current = null;
+    }
+    
+    loader.load(
+      modelPath,
+      (gltf) => {
+        const model = gltf.scene.clone();
+        model.visible = false; // Start hidden, show when hand detected
+        scene.add(model);
+        modelRef.current = model;
+        loadedModelPathRef.current = modelPath;
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading GLB model:', error);
+      }
+    );
+  }, [modelPath]);
 
+  // Update model/skeleton based on hand landmarks
+  useEffect(() => {
+    if (!landmarks) {
+      // Hide model when no hand detected
+      if (modelRef.current) {
+        modelRef.current.visible = false;
+      }
+      return;
+    }
+
+    // If we have a model loaded, position it on the hand
+    if (modelRef.current && modelPath) {
+      const model = modelRef.current;
+      model.visible = true;
+      
+      // Get key landmarks
+      const wrist = landmarks[0];
+      const middleFingerTip = landmarks[12];
+      const indexFingerMcp = landmarks[5];
+      const pinkyMcp = landmarks[17];
+      
+      // Calculate hand center (between wrist and middle finger base)
+      const middleFingerMcp = landmarks[9];
+      const centerX = (wrist.x + middleFingerMcp.x) / 2;
+      const centerY = (wrist.y + middleFingerMcp.y) / 2;
+      
+      // Calculate hand rotation angle
+      const angle = Math.atan2(
+        middleFingerTip.y - wrist.y,
+        middleFingerTip.x - wrist.x
+      );
+      
+      // Calculate hand size for scaling
+      const handSize = Math.sqrt(
+        Math.pow(middleFingerTip.x - wrist.x, 2) + 
+        Math.pow(middleFingerTip.y - wrist.y, 2)
+      );
+      
+      // Position model at hand center
+      model.position.x = (centerX - 0.5) * 2;
+      model.position.y = -(centerY - 0.5) * 2;
+      model.position.z = 0;
+      
+      // Rotate to align with hand orientation
+      model.rotation.z = -(angle - Math.PI / 2);
+      
+      // Scale based on hand size and configured scale
+      const dynamicScale = handSize * modelScale * 5;
+      model.scale.set(dynamicScale, dynamicScale, dynamicScale);
+      
+      return; // Don't draw wireframe when using model
+    }
+
+    // Fallback: draw wireframe skeleton if no model
     const group = skeletonGroupRef.current;
+    if (!group) return;
     
     // Clear previous skeleton
     while (group.children.length > 0) {
@@ -188,7 +285,7 @@ export function useSkeletonOverlay({ canvasRef, landmarks, speciesId }: Skeleton
       group.add(joint);
     });
 
-  }, [landmarks, speciesId]);
+  }, [landmarks, speciesId, modelPath, modelScale]);
 
   // Animation loop
   useEffect(() => {
