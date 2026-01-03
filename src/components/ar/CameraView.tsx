@@ -30,7 +30,7 @@ export function CameraView() {
     landmarks,
     speciesId: selectedSpecies.id,
     modelPath: selectedSpecies.modelPath,
-    modelScale: 0.1, // Adjust this value if model is too large/small
+    modelScale: 0.05, // Adjust this value if model is too large/small
   });
 
   // Hide instruction after hand is detected
