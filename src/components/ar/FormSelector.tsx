@@ -45,31 +45,21 @@ export function FormSelector({ species, selected, onSelect, onOpenBoneKey }: For
     };
   }, [emblaApi, onSelectSlide]);
 
-  // Sync carousel with external selection
+  // Sync carousel to selected species only on mount
   useEffect(() => {
     if (!emblaApi) return;
     const index = species.findIndex(s => s.id === selected.id);
-    if (index !== -1 && index !== selectedIndex) {
-      emblaApi.scrollTo(index);
+    if (index !== -1) {
+      emblaApi.scrollTo(index, true); // instant scroll on mount
     }
-  }, [emblaApi, selected.id, species, selectedIndex]);
+  }, [emblaApi]); // Only run when emblaApi initializes
 
-  const handleCardClick = (s: Species, index: number) => {
-    if (index === selectedIndex) {
-      // Already selected, trigger selection
-      onSelect(s);
-    } else {
-      // Scroll to this card
-      emblaApi?.scrollTo(index);
-    }
+  const handleCardClick = (s: Species) => {
+    // Tapping any card confirms selection (loads model)
+    onSelect(s);
   };
 
-  // Select species when carousel settles
-  useEffect(() => {
-    if (species[selectedIndex] && species[selectedIndex].id !== selected.id) {
-      onSelect(species[selectedIndex]);
-    }
-  }, [selectedIndex, species, selected.id, onSelect]);
+  const isSelected = (s: Species) => s.id === selected.id;
 
   return (
     <div className="absolute bottom-0 left-0 right-0 z-20">
@@ -99,13 +89,18 @@ export function FormSelector({ species, selected, onSelect, onOpenBoneKey }: For
                   className="flex-[0_0_70%] min-w-0 px-2"
                 >
                   <button
-                    onClick={() => handleCardClick(s, index)}
-                    className={`w-full px-5 py-4 rounded-xl text-center transition-all duration-300 ${
+                    onClick={() => handleCardClick(s)}
+                    className={`w-full px-5 py-4 rounded-xl text-center transition-all duration-300 relative ${
                       index === selectedIndex
                         ? 'bg-primary text-primary-foreground box-glow scale-100'
                         : 'bg-secondary/60 text-secondary-foreground border border-border/50 scale-95 opacity-70'
-                    }`}
+                    } ${isSelected(s) ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}
                   >
+                    {isSelected(s) && (
+                      <span className="absolute top-2 right-2 text-xs bg-primary-foreground/20 px-2 py-0.5 rounded-full">
+                        Active
+                      </span>
+                    )}
                     <p className="text-lg font-semibold">{s.commonName}</p>
                     <p className={`text-xs italic ${
                       index === selectedIndex ? 'text-primary-foreground/80' : 'text-muted-foreground'
