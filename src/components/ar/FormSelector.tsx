@@ -1,5 +1,7 @@
+import { useCallback, useEffect, useState } from 'react';
 import { Species } from '@/types/species';
-import { Palette } from 'lucide-react';
+import { Palette, ChevronLeft, ChevronRight } from 'lucide-react';
+import useEmblaCarousel from 'embla-carousel-react';
 
 interface FormSelectorProps {
   species: Species[];
@@ -9,46 +11,141 @@ interface FormSelectorProps {
 }
 
 export function FormSelector({ species, selected, onSelect, onOpenBoneKey }: FormSelectorProps) {
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: 'center',
+    containScroll: false,
+    loop: true,
+  });
+  
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+
+  const onSelectSlide = useCallback(() => {
+    if (!emblaApi) return;
+    const index = emblaApi.selectedScrollSnap();
+    setSelectedIndex(index);
+    setCanScrollPrev(emblaApi.canScrollPrev());
+    setCanScrollNext(emblaApi.canScrollNext());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    
+    onSelectSlide();
+    emblaApi.on('select', onSelectSlide);
+    emblaApi.on('reInit', onSelectSlide);
+    
+    return () => {
+      emblaApi.off('select', onSelectSlide);
+      emblaApi.off('reInit', onSelectSlide);
+    };
+  }, [emblaApi, onSelectSlide]);
+
+  // Sync carousel with external selection
+  useEffect(() => {
+    if (!emblaApi) return;
+    const index = species.findIndex(s => s.id === selected.id);
+    if (index !== -1 && index !== selectedIndex) {
+      emblaApi.scrollTo(index);
+    }
+  }, [emblaApi, selected.id, species, selectedIndex]);
+
+  const handleCardClick = (s: Species, index: number) => {
+    if (index === selectedIndex) {
+      // Already selected, trigger selection
+      onSelect(s);
+    } else {
+      // Scroll to this card
+      emblaApi?.scrollTo(index);
+    }
+  };
+
+  // Select species when carousel settles
+  useEffect(() => {
+    if (species[selectedIndex] && species[selectedIndex].id !== selected.id) {
+      onSelect(species[selectedIndex]);
+    }
+  }, [selectedIndex, species, selected.id, onSelect]);
+
   return (
     <div className="absolute bottom-0 left-0 right-0 z-20">
-      <div className="bg-gradient-to-t from-background via-background/95 to-transparent pt-12 pb-8 px-4">
+      <div className="bg-gradient-to-t from-background via-background/95 to-transparent pt-12 pb-6 px-4">
         {/* Title */}
         <p className="text-center text-sm text-muted-foreground tracking-widest uppercase mb-4">
           See your hand as a…
         </p>
         
-        {/* Species Pills */}
-        <div className="flex justify-center gap-2 flex-wrap mb-6">
-          {species.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => onSelect(s)}
-              className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
-                selected.id === s.id
-                  ? 'bg-primary text-primary-foreground box-glow'
-                  : 'bg-secondary/80 text-secondary-foreground hover:bg-secondary border border-border/50'
-              }`}
-            >
-              {s.commonName}
-            </button>
-          ))}
-        </div>
-        
-        {/* Bottom Info Bar */}
-        <div className="flex items-center justify-between px-2">
-          {/* Era Info */}
-          <div className="flex gap-4">
-            <div className="text-left">
-              <p className="text-xs text-muted-foreground">Geological Era</p>
-              <p className="text-sm font-semibold text-foreground">{selected.era}</p>
-            </div>
-            <div className="text-left">
-              <p className="text-xs text-muted-foreground">Time Period</p>
-              <p className="text-sm font-semibold text-foreground">{selected.period}</p>
+        {/* Carousel */}
+        <div className="relative">
+          {/* Prev Button */}
+          <button
+            onClick={scrollPrev}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-secondary/80 backdrop-blur-sm flex items-center justify-center border border-border/50 hover:bg-secondary transition-colors"
+            aria-label="Previous animal"
+          >
+            <ChevronLeft className="w-4 h-4 text-foreground" />
+          </button>
+          
+          {/* Carousel Container */}
+          <div className="overflow-hidden mx-10" ref={emblaRef}>
+            <div className="flex">
+              {species.map((s, index) => (
+                <div
+                  key={s.id}
+                  className="flex-[0_0_70%] min-w-0 px-2"
+                >
+                  <button
+                    onClick={() => handleCardClick(s, index)}
+                    className={`w-full px-5 py-4 rounded-xl text-center transition-all duration-300 ${
+                      index === selectedIndex
+                        ? 'bg-primary text-primary-foreground box-glow scale-100'
+                        : 'bg-secondary/60 text-secondary-foreground border border-border/50 scale-95 opacity-70'
+                    }`}
+                  >
+                    <p className="text-lg font-semibold">{s.commonName}</p>
+                    <p className={`text-xs italic ${
+                      index === selectedIndex ? 'text-primary-foreground/80' : 'text-muted-foreground'
+                    }`}>
+                      {s.scientificName}
+                    </p>
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
           
-          {/* Bone Key Button */}
+          {/* Next Button */}
+          <button
+            onClick={scrollNext}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-secondary/80 backdrop-blur-sm flex items-center justify-center border border-border/50 hover:bg-secondary transition-colors"
+            aria-label="Next animal"
+          >
+            <ChevronRight className="w-4 h-4 text-foreground" />
+          </button>
+        </div>
+        
+        {/* Dot Indicators */}
+        <div className="flex justify-center gap-1.5 mt-4">
+          {species.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => emblaApi?.scrollTo(index)}
+              className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                index === selectedIndex
+                  ? 'bg-primary w-4'
+                  : 'bg-muted-foreground/40 hover:bg-muted-foreground/60'
+              }`}
+              aria-label={`Go to ${species[index].commonName}`}
+            />
+          ))}
+        </div>
+        
+        {/* Bone Key Button */}
+        <div className="flex justify-center mt-4">
           <button
             onClick={onOpenBoneKey}
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary/80 border border-border/50 hover:bg-secondary transition-colors"
