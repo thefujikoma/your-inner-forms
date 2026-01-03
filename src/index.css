@@ -41,13 +41,16 @@
 
     --radius: 0.75rem;
 
-    /* Bone color palette */
-    --bone-humerus: 280 70% 60%;
-    --bone-radius: 200 80% 55%;
-    --bone-ulna: 170 70% 50%;
-    --bone-carpals: 45 80% 55%;
-    --bone-metacarpals: 25 80% 55%;
-    --bone-phalanges: 340 70% 60%;
+    /* Bone color palette - Forelimb Homology Project official colors */
+    --bone-humerus: 227 100% 60%;
+    --bone-radius: 79 74% 75%;
+    --bone-ulna: 199 35% 65%;
+    --bone-carpals: 340 54% 55%;
+    --bone-carpometacarpus: 60 77% 66%;
+    --bone-phalanges: 338 100% 83%;
+    --bone-radioulna: 148 43% 58%;
+    --bone-intermedium: 0 0% 60%;
+    --bone-finrays: 280 45% 60%;
 
     /* Glow effects */
     --glow-primary: 195 90% 50%;
