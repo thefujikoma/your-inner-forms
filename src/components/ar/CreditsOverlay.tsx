@@ -1,4 +1,5 @@
-import { X } from 'lucide-react';
+import { X, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface CreditsOverlayProps {
   isOpen: boolean;
@@ -6,7 +7,14 @@ interface CreditsOverlayProps {
 }
 
 export function CreditsOverlay({ isOpen, onClose }: CreditsOverlayProps) {
+  const navigate = useNavigate();
+  
   if (!isOpen) return null;
+
+  const handleViewReferences = () => {
+    onClose();
+    navigate('/references');
+  };
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center p-6">
@@ -48,7 +56,17 @@ export function CreditsOverlay({ isOpen, onClose }: CreditsOverlayProps) {
             </p>
           </div>
           
-          <div className="pt-4 border-t border-border text-center">
+          <div className="pt-4 border-t border-border">
+            <button
+              onClick={handleViewReferences}
+              className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium transition-colors"
+            >
+              View Full Attribution
+              <ExternalLink className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          
+          <div className="pt-3 text-center">
             <p className="text-xs text-primary">
               Designed for Educational Use
             </p>
