@@ -6,6 +6,7 @@ export interface Species {
   timePeriod?: string;
   whyItMatters: string;
   keyIdea: string;
+  modelPath?: string;
 }
 
 export const SPECIES_DATA: Species[] = [
@@ -58,6 +59,7 @@ export const SPECIES_DATA: Species[] = [
     group: 'Mammal',
     whyItMatters: 'Bat wings are built from the same bones found in the human hand—but stretched and reshaped to support flight. The fingers become the structure itself, demonstrating how evolution repurposes existing anatomy for entirely new functions.',
     keyIdea: "Flight didn't require new bones—just new proportions.",
+    modelPath: '/models/BatWingTest.glb',
   },
 ];
 

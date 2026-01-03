@@ -1,6 +1,6 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, useGLTF } from '@react-three/drei';
 import { FormSelector } from './FormSelector';
 import { InstructionOverlay } from './InstructionOverlay';
 import { InsightMoment } from './InsightMoment';
@@ -11,6 +11,27 @@ import { SPECIES_DATA, Species, BONE_GROUPS } from '@/types/species';
 import { Info, ChevronDown, Hand, Move3D, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import * as THREE from 'three';
+
+// GLB Model component
+function SpeciesModel({ modelPath }: { modelPath: string }) {
+  const { scene } = useGLTF(modelPath);
+  const groupRef = useRef<THREE.Group>(null);
+  
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.3) * 0.2;
+    }
+  });
+
+  // Clone the scene to avoid issues with reusing
+  const clonedScene = scene.clone();
+  
+  return (
+    <group ref={groupRef}>
+      <primitive object={clonedScene} scale={1} />
+    </group>
+  );
+}
 
 // Placeholder skeleton visualization
 function PlaceholderSkeleton() {
@@ -54,8 +75,18 @@ function PlaceholderSkeleton() {
   );
 }
 
+// Loading fallback
+function LoadingFallback() {
+  return (
+    <mesh>
+      <sphereGeometry args={[0.3, 16, 16]} />
+      <meshStandardMaterial color="#3157FF" wireframe />
+    </mesh>
+  );
+}
+
 // Scene component with controls
-function Scene() {
+function Scene({ modelPath }: { modelPath?: string }) {
   const { camera } = useThree();
   
   useEffect(() => {
@@ -69,7 +100,13 @@ function Scene() {
       <directionalLight position={[-5, -5, -5]} intensity={0.3} />
       <pointLight position={[0, 2, 0]} intensity={0.5} color="#8b5cf6" />
       
-      <PlaceholderSkeleton />
+      <Suspense fallback={<LoadingFallback />}>
+        {modelPath ? (
+          <SpeciesModel modelPath={modelPath} />
+        ) : (
+          <PlaceholderSkeleton />
+        )}
+      </Suspense>
       
       <OrbitControls 
         enablePan={false}
@@ -125,7 +162,7 @@ export function FreeExploreView() {
         onPointerDown={handleCanvasInteraction}
       >
         <Canvas>
-          <Scene />
+          <Scene modelPath={selectedSpecies.modelPath} />
         </Canvas>
       </div>
       
