@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Species } from '@/types/species';
-import { Palette, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Palette, ChevronLeft, ChevronRight, Hand } from 'lucide-react';
 import useEmblaCarousel from 'embla-carousel-react';
 
 interface FormSelectorProps {
@@ -8,9 +8,10 @@ interface FormSelectorProps {
   selected: Species;
   onSelect: (species: Species) => void;
   onOpenBoneKey: () => void;
+  isLoading?: boolean;
 }
 
-export function FormSelector({ species, selected, onSelect, onOpenBoneKey }: FormSelectorProps) {
+export function FormSelector({ species, selected, onSelect, onOpenBoneKey, isLoading = false }: FormSelectorProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'center',
     containScroll: false,
@@ -96,17 +97,34 @@ export function FormSelector({ species, selected, onSelect, onOpenBoneKey }: For
                         : 'bg-secondary/60 text-secondary-foreground border border-border/50 scale-95 opacity-70'
                     } ${isSelected(s) ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}
                   >
+                    {/* Active badge */}
                     {isSelected(s) && (
                       <span className="absolute top-2 right-2 text-xs bg-primary-foreground/20 px-2 py-0.5 rounded-full">
-                        Active
+                        {isLoading ? 'Loading...' : 'Active'}
                       </span>
                     )}
+                    
+                    {/* Loading spinner on selected card */}
+                    {isSelected(s) && isLoading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-primary/80 rounded-xl">
+                        <div className="w-6 h-6 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    )}
+                    
                     <p className="text-lg font-semibold">{s.commonName}</p>
                     <p className={`text-xs italic ${
                       index === selectedIndex ? 'text-primary-foreground/80' : 'text-muted-foreground'
                     }`}>
                       {s.scientificName}
                     </p>
+                    
+                    {/* Tap to View hint on centered, non-selected card */}
+                    {index === selectedIndex && !isSelected(s) && (
+                      <div className="flex items-center justify-center gap-1 mt-2 text-xs text-primary-foreground/70">
+                        <Hand className="w-3 h-3" />
+                        <span>Tap to view</span>
+                      </div>
+                    )}
                   </button>
                 </div>
               ))}
