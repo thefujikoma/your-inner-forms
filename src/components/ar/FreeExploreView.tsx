@@ -7,6 +7,7 @@ import { InsightMoment } from './InsightMoment';
 import { BoneKeyOverlay } from './BoneKeyOverlay';
 import { CreditsOverlay } from './CreditsOverlay';
 import { AnimalDetailDrawer } from './AnimalDetailDrawer';
+import { ScaleSlider } from './ScaleSlider';
 import { SPECIES_DATA, Species, BONE_GROUPS } from '@/types/species';
 import { Info, ChevronDown, Hand, Move3D, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -14,12 +15,12 @@ import * as THREE from 'three';
 import { MODEL_CONFIG } from '@/constants/modelConfig';
 
 // GLB Model component - Scaled to match AR hand mode
-function SpeciesModel({ modelPath }: { modelPath: string }) {
+function SpeciesModel({ modelPath, userScale }: { modelPath: string; userScale: number }) {
   const { scene } = useGLTF(modelPath);
   const clonedScene = scene.clone();
   
-  // Use same scale as AR hand mode for consistency
-  const scale = MODEL_CONFIG.HAND_MODE_SCALE_MULTIPLIER;
+  // Use same scale as AR hand mode for consistency, with user adjustment
+  const scale = MODEL_CONFIG.HAND_MODE_SCALE_MULTIPLIER * userScale;
   
   return (
     <primitive 
@@ -84,7 +85,7 @@ function LoadingFallback() {
 }
 
 // Scene component with controls
-function Scene({ modelPath }: { modelPath?: string }) {
+function Scene({ modelPath, userScale }: { modelPath?: string; userScale: number }) {
   const { camera } = useThree();
   
   useEffect(() => {
@@ -100,7 +101,7 @@ function Scene({ modelPath }: { modelPath?: string }) {
       
       <Suspense fallback={<LoadingFallback />}>
         {modelPath ? (
-          <SpeciesModel modelPath={modelPath} />
+          <SpeciesModel modelPath={modelPath} userScale={userScale} />
         ) : (
           <PlaceholderSkeleton />
         )}
@@ -125,6 +126,7 @@ export function FreeExploreView() {
   const [showBoneKey, setShowBoneKey] = useState(false);
   const [showCredits, setShowCredits] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
+  const [userScale, setUserScale] = useState(MODEL_CONFIG.DEFAULT_USER_SCALE);
 
   // Hide instruction after interaction
   useEffect(() => {
@@ -160,7 +162,7 @@ export function FreeExploreView() {
         onPointerDown={handleCanvasInteraction}
       >
         <Canvas>
-          <Scene modelPath={selectedSpecies.modelPath} />
+          <Scene modelPath={selectedSpecies.modelPath} userScale={userScale} />
         </Canvas>
       </div>
       
@@ -231,6 +233,11 @@ export function FreeExploreView() {
         onSelect={handleSpeciesChange}
         onOpenBoneKey={() => setShowBoneKey(true)}
       />
+      
+      {/* Scale Slider - positioned next to bone key area */}
+      <div className="absolute bottom-32 right-4 z-10">
+        <ScaleSlider value={userScale} onChange={setUserScale} />
+      </div>
       
       {/* Insight Moment */}
       <InsightMoment show={hasInteracted} />
