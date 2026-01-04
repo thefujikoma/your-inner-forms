@@ -129,22 +129,16 @@ export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath 
       const model = modelRef.current;
       model.visible = true;
       
-      // Get key landmarks
+      // Get key landmarks for orientation calculation
       const wrist = landmarks[0];
       const middleFingerTip = landmarks[12];
-      const indexFingerMcp = landmarks[5];
+      const indexMcp = landmarks[5];
       const pinkyMcp = landmarks[17];
+      const middleMcp = landmarks[9];
       
       // Calculate hand center (between wrist and middle finger base)
-      const middleFingerMcp = landmarks[9];
-      const centerX = (wrist.x + middleFingerMcp.x) / 2;
-      const centerY = (wrist.y + middleFingerMcp.y) / 2;
-      
-      // Calculate hand rotation angle
-      const angle = Math.atan2(
-        middleFingerTip.y - wrist.y,
-        middleFingerTip.x - wrist.x
-      );
+      const centerX = (wrist.x + middleMcp.x) / 2;
+      const centerY = (wrist.y + middleMcp.y) / 2;
       
       // Calculate hand size for scaling
       const handSize = Math.sqrt(
@@ -152,16 +146,44 @@ export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath 
         Math.pow(middleFingerTip.y - wrist.y, 2)
       );
       
-      // Position model at hand center
+      // Position model at hand center (convert normalized coords to NDC)
       model.position.x = (centerX - 0.5) * 2;
       model.position.y = -(centerY - 0.5) * 2;
       model.position.z = 0;
       
-      // Apply Blender to Three.js axis correction (Z-up to Y-up)
-      model.rotation.x = MODEL_CONFIG.BLENDER_ROTATION_X;
+      // === 3D Rotation Alignment ===
+      // Calculate forward direction (wrist to middle finger) - becomes model Z axis
+      const forward = new THREE.Vector3(
+        middleMcp.x - wrist.x,
+        -(middleMcp.y - wrist.y), // Flip Y for screen coords
+        (middleMcp.z - wrist.z) * 2 // Amplify Z for more depth sensitivity
+      ).normalize();
       
-      // Rotate to align with hand orientation (applied after axis correction)
-      model.rotation.z = -(angle - Math.PI / 2);
+      // Calculate right direction (index to pinky) - becomes model X axis
+      const right = new THREE.Vector3(
+        pinkyMcp.x - indexMcp.x,
+        -(pinkyMcp.y - indexMcp.y),
+        (pinkyMcp.z - indexMcp.z) * 2
+      ).normalize();
+      
+      // Calculate up direction (palm normal) via cross product
+      const up = new THREE.Vector3().crossVectors(forward, right).normalize();
+      
+      // Recalculate right to ensure orthogonality
+      right.crossVectors(up, forward).normalize();
+      
+      // Build rotation matrix from hand orientation axes
+      const handRotation = new THREE.Matrix4();
+      handRotation.makeBasis(right, up, forward);
+      
+      // Create Blender correction matrix (Z-up to Y-up)
+      const blenderCorrection = new THREE.Matrix4().makeRotationX(MODEL_CONFIG.BLENDER_ROTATION_X);
+      
+      // Combine: first apply Blender correction, then hand orientation
+      const finalRotation = new THREE.Matrix4().multiplyMatrices(handRotation, blenderCorrection);
+      
+      // Apply rotation to model
+      model.setRotationFromMatrix(finalRotation);
       
       // Scale based on hand size with calibrated multiplier
       const dynamicScale = handSize * MODEL_CONFIG.HAND_MODE_SCALE_MULTIPLIER;
