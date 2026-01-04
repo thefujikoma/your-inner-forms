@@ -172,17 +172,16 @@ export function CameraView() {
         selected={selectedSpecies}
         onSelect={handleSpeciesChange}
         onOpenBoneKey={() => setShowBoneKey(true)}
+        onOpenScaleSlider={() => setShowScaleSlider(true)}
       />
       
-      {/* Scale Slider Button - positioned left of where bone key button is in FormSelector */}
-      <div className="absolute bottom-32 right-20 z-10">
-        <ScaleSlider 
-          value={userScale} 
-          onChange={setUserScale}
-          isOpen={showScaleSlider}
-          onToggle={() => setShowScaleSlider(!showScaleSlider)}
-        />
-      </div>
+      {/* Scale Slider Overlay */}
+      <ScaleSlider 
+        value={userScale} 
+        onChange={setUserScale}
+        isOpen={showScaleSlider}
+        onToggle={() => setShowScaleSlider(!showScaleSlider)}
+      />
       
       {/* Insight Moment - appears once after first interaction */}
       <InsightMoment show={hasInteracted} />

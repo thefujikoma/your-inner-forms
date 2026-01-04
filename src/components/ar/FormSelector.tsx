@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Species } from '@/types/species';
-import { Palette, ChevronLeft, ChevronRight, Hand } from 'lucide-react';
+import { Palette, ChevronLeft, ChevronRight, Hand, Search } from 'lucide-react';
 import useEmblaCarousel from 'embla-carousel-react';
 
 interface FormSelectorProps {
@@ -8,10 +8,11 @@ interface FormSelectorProps {
   selected: Species;
   onSelect: (species: Species) => void;
   onOpenBoneKey: () => void;
+  onOpenScaleSlider: () => void;
   isLoading?: boolean;
 }
 
-export function FormSelector({ species, selected, onSelect, onOpenBoneKey, isLoading = false }: FormSelectorProps) {
+export function FormSelector({ species, selected, onSelect, onOpenBoneKey, onOpenScaleSlider, isLoading = false }: FormSelectorProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'center',
     containScroll: false,
@@ -157,8 +158,15 @@ export function FormSelector({ species, selected, onSelect, onOpenBoneKey, isLoa
           ))}
         </div>
         
-        {/* Bone Key Button */}
-        <div className="flex justify-center mt-4">
+        {/* Bottom Buttons */}
+        <div className="flex justify-center gap-3 mt-4">
+          <button
+            onClick={onOpenScaleSlider}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary/80 border border-border/50 hover:bg-secondary transition-colors"
+          >
+            <Search className="w-4 h-4 text-primary" />
+            <span className="text-sm text-foreground">Zoom In/Out</span>
+          </button>
           <button
             onClick={onOpenBoneKey}
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary/80 border border-border/50 hover:bg-secondary transition-colors"
