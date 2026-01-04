@@ -13,18 +13,20 @@ import { useNavigate } from 'react-router-dom';
 import * as THREE from 'three';
 import { MODEL_CONFIG } from '@/constants/modelConfig';
 
-// GLB Model component - Zero transforms to test raw Blender export
+// GLB Model component - Scaled to match AR hand mode
 function SpeciesModel({ modelPath }: { modelPath: string }) {
   const { scene } = useGLTF(modelPath);
-
-  // Clone the scene to avoid issues with reusing
   const clonedScene = scene.clone();
+  
+  // Use same scale as AR hand mode for consistency
+  const scale = MODEL_CONFIG.HAND_MODE_SCALE_MULTIPLIER;
   
   return (
     <primitive 
       object={clonedScene} 
       position={[0, 0, 0]}
       rotation={[0, 0, 0]}
+      scale={[scale, scale, scale]}
     />
   );
 }
@@ -86,7 +88,7 @@ function Scene({ modelPath }: { modelPath?: string }) {
   const { camera } = useThree();
   
   useEffect(() => {
-    camera.position.set(0, 0, 3);
+    camera.position.set(0, 0, 80); // Move camera back to fit scaled model
   }, [camera]);
 
   return (
@@ -106,8 +108,8 @@ function Scene({ modelPath }: { modelPath?: string }) {
       
       <OrbitControls 
         enablePan={false}
-        minDistance={1.5}
-        maxDistance={5}
+        minDistance={30}
+        maxDistance={150}
         enableDamping
         dampingFactor={0.05}
       />
