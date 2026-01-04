@@ -155,26 +155,28 @@ export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath 
       // Calculate forward direction (wrist to middle finger) - becomes model Z axis
       const forward = new THREE.Vector3(
         middleMcp.x - wrist.x,
-        -(middleMcp.y - wrist.y), // Flip Y for screen coords
-        (middleMcp.z - wrist.z) * 2 // Amplify Z for more depth sensitivity
+        middleMcp.y - wrist.y, // Keep Y as-is, handle orientation via basis
+        -(middleMcp.z - wrist.z) * 2 // Negate Z (MediaPipe: -Z toward camera, Three.js: +Z toward camera)
       ).normalize();
       
       // Calculate right direction (index to pinky) - becomes model X axis
       const right = new THREE.Vector3(
         pinkyMcp.x - indexMcp.x,
-        -(pinkyMcp.y - indexMcp.y),
-        (pinkyMcp.z - indexMcp.z) * 2
+        pinkyMcp.y - indexMcp.y,
+        -(pinkyMcp.z - indexMcp.z) * 2
       ).normalize();
       
       // Calculate up direction (palm normal) via cross product
-      const up = new THREE.Vector3().crossVectors(forward, right).normalize();
+      // Use right x forward for right-handed coordinate system
+      const up = new THREE.Vector3().crossVectors(right, forward).normalize();
       
       // Recalculate right to ensure orthogonality
-      right.crossVectors(up, forward).normalize();
+      right.crossVectors(forward, up).normalize();
       
       // Build rotation matrix from hand orientation axes
+      // Negate Y basis for screen-space coordinates
       const handRotation = new THREE.Matrix4();
-      handRotation.makeBasis(right, up, forward);
+      handRotation.makeBasis(right, up.negate(), forward);
       
       // Create Blender correction matrix (Z-up to Y-up)
       const blenderCorrection = new THREE.Matrix4().makeRotationX(MODEL_CONFIG.BLENDER_ROTATION_X);
