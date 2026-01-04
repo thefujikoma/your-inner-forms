@@ -208,9 +208,9 @@ export function CameraView() {
       
       {/* Left Hand Mode Guidance */}
       {cameraMode === 'laptop-left' && !isTracking && (
-        <div className="absolute top-32 left-4 z-10 bg-card/90 backdrop-blur-sm rounded-lg px-4 py-3 border border-primary/30 max-w-[200px]">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-card/90 backdrop-blur-sm rounded-lg px-4 py-3 border border-primary/30 max-w-[200px] text-center">
           <p className="text-sm text-foreground font-medium">Use your left hand</p>
-          <p className="text-xs text-muted-foreground mt-1">Palm facing the camera, fingers spread</p>
+          <p className="text-xs text-muted-foreground mt-1">Palm facing camera, fingers spread</p>
         </div>
       )}
       
