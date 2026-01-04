@@ -11,6 +11,7 @@ import { SPECIES_DATA, Species, BONE_GROUPS } from '@/types/species';
 import { Info, ChevronDown, Hand, Move3D, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import * as THREE from 'three';
+import { MODEL_CONFIG } from '@/constants/modelConfig';
 
 // GLB Model component
 function SpeciesModel({ modelPath }: { modelPath: string }) {
@@ -28,7 +29,10 @@ function SpeciesModel({ modelPath }: { modelPath: string }) {
   
   return (
     <group ref={groupRef}>
-      <primitive object={clonedScene} />
+      <primitive 
+        object={clonedScene} 
+        rotation={[MODEL_CONFIG.BLENDER_ROTATION_X, 0, 0]} 
+      />
     </group>
   );
 }
