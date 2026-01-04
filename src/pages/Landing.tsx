@@ -153,9 +153,10 @@ export default function Landing() {
                 <GraduationCap className="w-6 h-6 text-primary" />
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-semibold mb-2">Evolution in Action</h3>
+                <h3 className="text-xl font-semibold mb-2">Educators, start here</h3>
                 <p className="text-muted-foreground text-sm mb-4">
-                  A guided classroom activity that connects forelimb anatomy, evolution, and creative scientific reasoning.
+                  A guided classroom activity that connects forelimb anatomy, evolution, and creative scientific
+                  reasoning.
                 </p>
                 <div className="flex items-center gap-2 text-primary font-medium group-hover:gap-3 transition-all">
                   <span>View Activity</span>
