@@ -168,7 +168,7 @@ export default function References() {
           </h2>
           <p className="text-muted-foreground leading-relaxed">
             Models were modified in <span className="text-foreground font-medium">Blender</span> to 
-            reduce polygon count and to add rigging and alignment for real-time, web-based viewing 
+            reduce polygon count and alignment for real-time, web-based viewing 
             and interactive use. All modifications preserve the original educational intent and 
             color-based homology mappings.
           </p>
