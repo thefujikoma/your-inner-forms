@@ -18,7 +18,7 @@ export const SPECIES_DATA: Species[] = [
     timePeriod: '~400 million years ago (lineage)',
     whyItMatters: 'Coelacanths possess fleshy, lobed fins with internal bones that resemble the early blueprint of limbs. These structures show that the foundations of arms and hands evolved long before animals left the water.',
     keyIdea: "Limbs didn't appear suddenly—they were already hiding in fins.",
-    modelPath: '/models/Coelacanth_Forearm_Color.glb',
+    modelPath: '/models/Coelacanth_Forearm_Color2.glb',
   },
   {
     id: 'tiktaalik',
@@ -28,7 +28,7 @@ export const SPECIES_DATA: Species[] = [
     timePeriod: '~375 million years ago',
     whyItMatters: 'Tiktaalik represents a pivotal moment in vertebrate history. Its fin contains bones arranged like a limb, capable of supporting weight. This structure foreshadows the forelimbs of all land vertebrates—including your hand.',
     keyIdea: 'This is where fins began behaving like arms.',
-    modelPath: '/models/Tiktaalik_Forearm_Color.glb',
+    modelPath: '/models/Tiktaalik_Forearm_Color2.glb',
   },
   {
     id: 'hairyfrog',
@@ -37,7 +37,7 @@ export const SPECIES_DATA: Species[] = [
     group: 'Amphibian',
     whyItMatters: "Amphibians were among the first vertebrates to use limb-based movement on land. The hairy frog's forelimb shows a clear transition toward weight-bearing, jointed limbs while retaining its aquatic ancestry.",
     keyIdea: 'The same bones now solve two worlds: water and land.',
-    modelPath: '/models/Frog_Forearm_Color.glb',
+    modelPath: '/models/Frog_Forearm_Color2.glb',
   },
   {
     id: 'tortoise',
@@ -46,7 +46,7 @@ export const SPECIES_DATA: Species[] = [
     group: 'Reptile',
     whyItMatters: 'Tortoise forelimbs are modified for stability and support. While the same core bones remain, they are shortened and reinforced to suit a life built around protection, weight-bearing, and slow, deliberate movement.',
     keyIdea: 'Sometimes evolution favors strength over speed.',
-    modelPath: '/models/Turtle_Forearm_Color.glb',
+    modelPath: '/models/Turtle_Forearm_Color2.glb',
   },
   {
     id: 'rat',
@@ -55,7 +55,7 @@ export const SPECIES_DATA: Species[] = [
     group: 'Mammal',
     whyItMatters: 'The rat forelimb represents a generalized mammalian hand. It balances flexibility and strength, making it well-suited for grasping, climbing, and manipulation. This form closely resembles the underlying structure of the human hand.',
     keyIdea: 'This is the versatile default—adaptable, efficient, familiar.',
-    modelPath: '/models/Rat_Forearm_Color.glb',
+    modelPath: '/models/Rat_Forearm_Color2.glb',
   },
   {
     id: 'bat',
@@ -64,7 +64,7 @@ export const SPECIES_DATA: Species[] = [
     group: 'Mammal',
     whyItMatters: 'Bat wings are built from the same bones found in the human hand—but stretched and reshaped to support flight. The fingers become the structure itself, demonstrating how evolution repurposes existing anatomy for entirely new functions.',
     keyIdea: "Flight didn't require new bones—just new proportions.",
-    modelPath: '/models/Bat_Forearm_Color.glb',
+    modelPath: '/models/Bat_Forearm_Color2.glb',
   },
 ];
 
