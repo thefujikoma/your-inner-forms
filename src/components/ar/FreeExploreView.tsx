@@ -28,7 +28,7 @@ function SpeciesModel({ modelPath }: { modelPath: string }) {
   
   return (
     <group ref={groupRef}>
-      <primitive object={clonedScene} scale={0.03} />
+      <primitive object={clonedScene} />
     </group>
   );
 }
