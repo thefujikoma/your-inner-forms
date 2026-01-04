@@ -15,4 +15,7 @@ export const MODEL_CONFIG = {
   
   // Smoothing factor for hand tracking (0-1: lower = smoother but more lag)
   SMOOTHING_FACTOR: 0.3,
+  
+  // Default camera mode (false = phone/pass-through, true = laptop/mirrored)
+  DEFAULT_MIRRORED: false,
 };

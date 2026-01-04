@@ -10,9 +10,10 @@ interface SkeletonOverlayProps {
   speciesId: string;
   modelPath?: string;
   userScale?: number;
+  isMirrored?: boolean;
 }
 
-export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath, userScale = 1 }: SkeletonOverlayProps) {
+export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath, userScale = 1, isMirrored = false }: SkeletonOverlayProps) {
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.OrthographicCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -148,39 +149,52 @@ export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath,
       const middleMcp = landmarks[9];
       const middleFingerTip = landmarks[12];
       
+      // Helper function to mirror X coordinate when in mirrored mode
+      const mirrorX = (x: number) => isMirrored ? 1 - x : x;
+      
+      // Apply mirroring to landmark X coordinates
+      const wristX = mirrorX(wrist.x);
+      const indexMcpX = mirrorX(indexMcp.x);
+      const pinkyMcpX = mirrorX(pinkyMcp.x);
+      const middleMcpX = mirrorX(middleMcp.x);
+      const middleFingerTipX = mirrorX(middleFingerTip.x);
+      
       // Calculate hand center (between wrist and middle finger base)
-      const centerX = (wrist.x + middleMcp.x) / 2;
+      const centerX = (wristX + middleMcpX) / 2;
       const centerY = (wrist.y + middleMcp.y) / 2;
       
       // Calculate hand size for scaling
       const handSize = Math.sqrt(
-        Math.pow(middleFingerTip.x - wrist.x, 2) + 
+        Math.pow(middleFingerTipX - wristX, 2) + 
         Math.pow(middleFingerTip.y - wrist.y, 2)
       );
       
       // Calculate target position (convert normalized coords to NDC)
+      // Note: In mirrored mode, we also need to flip the final X position
       const targetPosition = new THREE.Vector3(
-        (centerX - 0.5) * 2,
+        (isMirrored ? -(centerX - 0.5) : (centerX - 0.5)) * 2,
         -(centerY - 0.5) * 2,
         0
       );
       
       // === Fresh 3D Rotation Alignment for RIGHT HAND ===
-      // Using back camera (no mirroring)
+      // Using back camera (no mirroring) OR laptop webcam (mirrored)
       // Models are Y-up from Blender export
       
       // Z-axis: Direction from index MCP (5) back to wrist (0)
       // Flipped to align model's "forward" with fingers pointing away
+      // In mirrored mode, we flip X direction
       const zAxis = new THREE.Vector3(
-        wrist.x - indexMcp.x,           // X: reversed direction
+        isMirrored ? -(wristX - indexMcpX) : (wristX - indexMcpX),  // X: reversed direction, flipped in mirror
         -(wrist.y - indexMcp.y),        // Y: flip (screen Y is inverted)
         -(wrist.z - indexMcp.z)         // Z: flip (MediaPipe Z is opposite)
       ).normalize();
       
       // X-axis: Direction from index MCP (5) to pinky MCP (17)
       // This is the "right" direction across the knuckles
+      // In mirrored mode, we flip X direction
       const xAxis = new THREE.Vector3(
-        pinkyMcp.x - indexMcp.x,        // X: same direction
+        isMirrored ? -(pinkyMcpX - indexMcpX) : (pinkyMcpX - indexMcpX),  // X: same direction, flipped in mirror
         -(pinkyMcp.y - indexMcp.y),     // Y: flip
         -(pinkyMcp.z - indexMcp.z)      // Z: flip
       ).normalize();
@@ -345,7 +359,7 @@ export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath,
       group.add(joint);
     });
 
-  }, [landmarks, speciesId, modelPath, userScale]);
+  }, [landmarks, speciesId, modelPath, userScale, isMirrored]);
 
   // Animation loop
   useEffect(() => {
