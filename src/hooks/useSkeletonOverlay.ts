@@ -161,12 +161,12 @@ export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath 
       // Using back camera (no mirroring)
       // Models are Y-up from Blender export
       
-      // Z-axis: Direction from wrist (0) to index MCP (5)
-      // This is the "forward" direction of the forearm/hand
+      // Z-axis: Direction from index MCP (5) back to wrist (0)
+      // Flipped to align model's "forward" with fingers pointing away
       const zAxis = new THREE.Vector3(
-        indexMcp.x - wrist.x,           // X: same direction
-        -(indexMcp.y - wrist.y),        // Y: flip (screen Y is inverted)
-        -(indexMcp.z - wrist.z)         // Z: flip (MediaPipe Z is opposite)
+        wrist.x - indexMcp.x,           // X: reversed direction
+        -(wrist.y - indexMcp.y),        // Y: flip (screen Y is inverted)
+        -(wrist.z - indexMcp.z)         // Z: flip (MediaPipe Z is opposite)
       ).normalize();
       
       // X-axis: Direction from index MCP (5) to pinky MCP (17)
