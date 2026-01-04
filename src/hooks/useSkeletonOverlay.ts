@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { HandLandmark } from './useHandTracking';
+import { MODEL_CONFIG } from '@/constants/modelConfig';
 
 interface SkeletonOverlayProps {
   canvasRef: React.RefObject<HTMLCanvasElement>;
@@ -156,11 +157,14 @@ export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath 
       model.position.y = -(centerY - 0.5) * 2;
       model.position.z = 0;
       
-      // Rotate to align with hand orientation
+      // Apply Blender to Three.js axis correction (Z-up to Y-up)
+      model.rotation.x = MODEL_CONFIG.BLENDER_ROTATION_X;
+      
+      // Rotate to align with hand orientation (applied after axis correction)
       model.rotation.z = -(angle - Math.PI / 2);
       
-      // Scale based on hand size (models are pre-scaled correctly)
-      const dynamicScale = handSize * 5;
+      // Scale based on hand size with calibrated multiplier
+      const dynamicScale = handSize * MODEL_CONFIG.HAND_MODE_SCALE_MULTIPLIER;
       model.scale.set(dynamicScale, dynamicScale, dynamicScale);
       
       return; // Don't draw wireframe when using model
