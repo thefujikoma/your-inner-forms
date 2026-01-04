@@ -9,7 +9,7 @@ import { CreditsOverlay } from './CreditsOverlay';
 import { AnimalDetailDrawer } from './AnimalDetailDrawer';
 import { ScaleSlider } from './ScaleSlider';
 import { SPECIES_DATA, Species } from '@/types/species';
-import { Info, ChevronDown, Move3D, Home } from 'lucide-react';
+import { Info, ChevronDown, Move3D, Home, FlipHorizontal2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { MODEL_CONFIG } from '@/constants/modelConfig';
 
@@ -26,6 +26,8 @@ export function CameraView() {
   const [showDetail, setShowDetail] = useState(false);
   const [userScale, setUserScale] = useState(MODEL_CONFIG.DEFAULT_USER_SCALE);
   const [showScaleSlider, setShowScaleSlider] = useState(false);
+  const [isMirrored, setIsMirrored] = useState(MODEL_CONFIG.DEFAULT_MIRRORED);
+  const [showMirrorHint, setShowMirrorHint] = useState(true);
   
   const { isLoading, isTracking, landmarks, error } = useHandTracking(videoRef);
   
@@ -35,7 +37,16 @@ export function CameraView() {
     speciesId: selectedSpecies.id,
     modelPath: selectedSpecies.modelPath,
     userScale,
+    isMirrored,
   });
+  
+  // Hide mirror hint after a few seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowMirrorHint(false);
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Hide instruction after hand is detected
   useEffect(() => {
@@ -60,6 +71,7 @@ export function CameraView() {
       <video
         ref={videoRef}
         className="absolute inset-0 w-full h-full object-cover"
+        style={{ transform: isMirrored ? 'scaleX(-1)' : 'none' }}
         playsInline
         muted
         autoPlay
@@ -72,6 +84,7 @@ export function CameraView() {
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full pointer-events-none"
+        style={{ transform: isMirrored ? 'scaleX(-1)' : 'none' }}
       />
       
       {/* Loading State */}
@@ -132,6 +145,33 @@ export function CameraView() {
       >
         <Home className="w-5 h-5 text-muted-foreground" />
       </button>
+      
+      {/* Camera Mode Toggle */}
+      <div className="absolute top-4 left-16 z-10 flex items-center gap-2">
+        <button
+          onClick={() => {
+            setIsMirrored(!isMirrored);
+            setShowMirrorHint(false);
+          }}
+          className={`h-10 px-3 rounded-full backdrop-blur-sm flex items-center gap-2 border transition-colors ${
+            isMirrored 
+              ? 'bg-primary/20 border-primary/50 text-primary' 
+              : 'bg-secondary/80 border-border/50 text-muted-foreground hover:bg-secondary'
+          }`}
+        >
+          <FlipHorizontal2 className="w-4 h-4" />
+          <span className="text-xs">{isMirrored ? 'Laptop' : 'Phone'}</span>
+        </button>
+        
+        {/* Hint for laptop users */}
+        {showMirrorHint && !isMirrored && (
+          <div className="bg-card/90 backdrop-blur-sm rounded-lg px-3 py-2 border border-border/50 animate-pulse">
+            <p className="text-xs text-muted-foreground">
+              Using a laptop? <span className="text-primary">Tap here</span>
+            </p>
+          </div>
+        )}
+      </div>
       
       {/* Species Info Display */}
       <div className="absolute top-16 left-4 z-10">
