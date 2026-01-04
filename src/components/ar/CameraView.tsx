@@ -7,9 +7,11 @@ import { InsightMoment } from './InsightMoment';
 import { BoneKeyOverlay } from './BoneKeyOverlay';
 import { CreditsOverlay } from './CreditsOverlay';
 import { AnimalDetailDrawer } from './AnimalDetailDrawer';
+import { ScaleSlider } from './ScaleSlider';
 import { SPECIES_DATA, Species } from '@/types/species';
 import { Info, ChevronDown, Move3D, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { MODEL_CONFIG } from '@/constants/modelConfig';
 
 export function CameraView() {
   const navigate = useNavigate();
@@ -22,6 +24,7 @@ export function CameraView() {
   const [showBoneKey, setShowBoneKey] = useState(false);
   const [showCredits, setShowCredits] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
+  const [userScale, setUserScale] = useState(MODEL_CONFIG.DEFAULT_USER_SCALE);
   
   const { isLoading, isTracking, landmarks, error } = useHandTracking(videoRef);
   
@@ -30,6 +33,7 @@ export function CameraView() {
     landmarks,
     speciesId: selectedSpecies.id,
     modelPath: selectedSpecies.modelPath,
+    userScale,
   });
 
   // Hide instruction after hand is detected
@@ -168,6 +172,11 @@ export function CameraView() {
         onSelect={handleSpeciesChange}
         onOpenBoneKey={() => setShowBoneKey(true)}
       />
+      
+      {/* Scale Slider - positioned next to bone key area */}
+      <div className="absolute bottom-32 right-4 z-10">
+        <ScaleSlider value={userScale} onChange={setUserScale} />
+      </div>
       
       {/* Insight Moment - appears once after first interaction */}
       <InsightMoment show={hasInteracted} />

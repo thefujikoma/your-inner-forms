@@ -9,9 +9,10 @@ interface SkeletonOverlayProps {
   landmarks: HandLandmark[] | null;
   speciesId: string;
   modelPath?: string;
+  userScale?: number;
 }
 
-export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath }: SkeletonOverlayProps) {
+export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath, userScale = 1 }: SkeletonOverlayProps) {
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.OrthographicCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -19,6 +20,11 @@ export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath 
   const modelRef = useRef<THREE.Group | null>(null);
   const loaderRef = useRef<GLTFLoader | null>(null);
   const loadedModelPathRef = useRef<string | null>(null);
+  
+  // Smoothing refs for temporal filtering
+  const prevPositionRef = useRef(new THREE.Vector3());
+  const prevQuaternionRef = useRef(new THREE.Quaternion());
+  const isFirstFrameRef = useRef(true);
 
   // Initialize Three.js scene
   useEffect(() => {
@@ -152,10 +158,12 @@ export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath 
         Math.pow(middleFingerTip.y - wrist.y, 2)
       );
       
-      // Position model at hand center (convert normalized coords to NDC)
-      model.position.x = (centerX - 0.5) * 2;
-      model.position.y = -(centerY - 0.5) * 2;
-      model.position.z = 0;
+      // Calculate target position (convert normalized coords to NDC)
+      const targetPosition = new THREE.Vector3(
+        (centerX - 0.5) * 2,
+        -(centerY - 0.5) * 2,
+        0
+      );
       
       // === Fresh 3D Rotation Alignment for RIGHT HAND ===
       // Using back camera (no mirroring)
@@ -188,11 +196,34 @@ export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath 
       const handRotation = new THREE.Matrix4();
       handRotation.makeBasis(xAxis, yAxis, zAxis);
       
-      // Apply rotation directly - no Blender correction needed since models are Y-up
-      model.setRotationFromMatrix(handRotation);
+      // Calculate target quaternion from rotation matrix
+      const targetQuaternion = new THREE.Quaternion();
+      targetQuaternion.setFromRotationMatrix(handRotation);
       
-      // Scale based on hand size with calibrated multiplier
-      const dynamicScale = handSize * MODEL_CONFIG.HAND_MODE_SCALE_MULTIPLIER;
+      // Apply temporal smoothing
+      const smoothing = MODEL_CONFIG.SMOOTHING_FACTOR;
+      
+      if (isFirstFrameRef.current) {
+        // First frame: no smoothing, set directly
+        prevPositionRef.current.copy(targetPosition);
+        prevQuaternionRef.current.copy(targetQuaternion);
+        isFirstFrameRef.current = false;
+      } else {
+        // Smooth position using lerp (interpolate toward target)
+        targetPosition.lerp(prevPositionRef.current, 1 - smoothing);
+        prevPositionRef.current.copy(targetPosition);
+        
+        // Smooth rotation using slerp (spherical interpolation)
+        targetQuaternion.slerp(prevQuaternionRef.current, 1 - smoothing);
+        prevQuaternionRef.current.copy(targetQuaternion);
+      }
+      
+      // Apply smoothed position and rotation
+      model.position.copy(targetPosition);
+      model.setRotationFromQuaternion(targetQuaternion);
+      
+      // Scale based on hand size with calibrated multiplier and user scale
+      const dynamicScale = handSize * MODEL_CONFIG.HAND_MODE_SCALE_MULTIPLIER * userScale;
       model.scale.set(dynamicScale, dynamicScale, dynamicScale);
       
       return; // Don't draw wireframe when using model
@@ -314,7 +345,7 @@ export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath 
       group.add(joint);
     });
 
-  }, [landmarks, speciesId, modelPath]);
+  }, [landmarks, speciesId, modelPath, userScale]);
 
   // Animation loop
   useEffect(() => {
