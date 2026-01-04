@@ -25,6 +25,7 @@ export function CameraView() {
   const [showCredits, setShowCredits] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [userScale, setUserScale] = useState(MODEL_CONFIG.DEFAULT_USER_SCALE);
+  const [showScaleSlider, setShowScaleSlider] = useState(false);
   
   const { isLoading, isTracking, landmarks, error } = useHandTracking(videoRef);
   
@@ -173,9 +174,14 @@ export function CameraView() {
         onOpenBoneKey={() => setShowBoneKey(true)}
       />
       
-      {/* Scale Slider - positioned next to bone key area */}
-      <div className="absolute bottom-32 right-4 z-10">
-        <ScaleSlider value={userScale} onChange={setUserScale} />
+      {/* Scale Slider Button - positioned left of where bone key button is in FormSelector */}
+      <div className="absolute bottom-32 right-20 z-10">
+        <ScaleSlider 
+          value={userScale} 
+          onChange={setUserScale}
+          isOpen={showScaleSlider}
+          onToggle={() => setShowScaleSlider(!showScaleSlider)}
+        />
       </div>
       
       {/* Insight Moment - appears once after first interaction */}
