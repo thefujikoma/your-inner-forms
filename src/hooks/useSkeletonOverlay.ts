@@ -129,12 +129,18 @@ export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath 
       const model = modelRef.current;
       model.visible = true;
       
+      // Hide skeleton wireframe when using 3D model
+      if (skeletonGroupRef.current) {
+        skeletonGroupRef.current.visible = false;
+      }
+      
       // Get key landmarks for orientation calculation
+      // Landmark 0 = Wrist, 5 = Index MCP, 17 = Pinky MCP, 9 = Middle MCP
       const wrist = landmarks[0];
-      const middleFingerTip = landmarks[12];
       const indexMcp = landmarks[5];
       const pinkyMcp = landmarks[17];
       const middleMcp = landmarks[9];
+      const middleFingerTip = landmarks[12];
       
       // Calculate hand center (between wrist and middle finger base)
       const centerX = (wrist.x + middleMcp.x) / 2;
@@ -151,41 +157,39 @@ export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath 
       model.position.y = -(centerY - 0.5) * 2;
       model.position.z = 0;
       
-      // === 3D Rotation Alignment ===
-      // Calculate forward direction (wrist to middle finger) - becomes model Z axis
-      const forward = new THREE.Vector3(
-        middleMcp.x - wrist.x,
-        middleMcp.y - wrist.y, // Keep Y as-is, handle orientation via basis
-        -(middleMcp.z - wrist.z) * 2 // Negate Z (MediaPipe: -Z toward camera, Three.js: +Z toward camera)
+      // === Fresh 3D Rotation Alignment for RIGHT HAND ===
+      // Using back camera (no mirroring)
+      // Models are Y-up from Blender export
+      
+      // Z-axis: Direction from wrist (0) to index MCP (5)
+      // This is the "forward" direction of the forearm/hand
+      const zAxis = new THREE.Vector3(
+        indexMcp.x - wrist.x,           // X: same direction
+        -(indexMcp.y - wrist.y),        // Y: flip (screen Y is inverted)
+        -(indexMcp.z - wrist.z)         // Z: flip (MediaPipe Z is opposite)
       ).normalize();
       
-      // Calculate right direction (index to pinky) - becomes model X axis
-      const right = new THREE.Vector3(
-        pinkyMcp.x - indexMcp.x,
-        pinkyMcp.y - indexMcp.y,
-        -(pinkyMcp.z - indexMcp.z) * 2
+      // X-axis: Direction from index MCP (5) to pinky MCP (17)
+      // This is the "right" direction across the knuckles
+      const xAxis = new THREE.Vector3(
+        pinkyMcp.x - indexMcp.x,        // X: same direction
+        -(pinkyMcp.y - indexMcp.y),     // Y: flip
+        -(pinkyMcp.z - indexMcp.z)      // Z: flip
       ).normalize();
       
-      // Calculate up direction (palm normal) via cross product
-      // Use right x forward for right-handed coordinate system
-      const up = new THREE.Vector3().crossVectors(right, forward).normalize();
+      // Y-axis: Cross product gives palm normal (up direction)
+      // For right-handed coordinate system with right hand: Y = Z cross X
+      const yAxis = new THREE.Vector3().crossVectors(zAxis, xAxis).normalize();
       
-      // Recalculate right to ensure orthogonality
-      right.crossVectors(forward, up).normalize();
+      // Recalculate X to ensure perfect orthogonality: X = Y cross Z
+      xAxis.crossVectors(yAxis, zAxis).normalize();
       
-      // Build rotation matrix from hand orientation axes
-      // Negate Y basis for screen-space coordinates
+      // Build rotation matrix from orthonormal basis
       const handRotation = new THREE.Matrix4();
-      handRotation.makeBasis(right, up.negate(), forward);
+      handRotation.makeBasis(xAxis, yAxis, zAxis);
       
-      // Create Blender correction matrix (Z-up to Y-up)
-      const blenderCorrection = new THREE.Matrix4().makeRotationX(MODEL_CONFIG.BLENDER_ROTATION_X);
-      
-      // Combine: first apply Blender correction, then hand orientation
-      const finalRotation = new THREE.Matrix4().multiplyMatrices(handRotation, blenderCorrection);
-      
-      // Apply rotation to model
-      model.setRotationFromMatrix(finalRotation);
+      // Apply rotation directly - no Blender correction needed since models are Y-up
+      model.setRotationFromMatrix(handRotation);
       
       // Scale based on hand size with calibrated multiplier
       const dynamicScale = handSize * MODEL_CONFIG.HAND_MODE_SCALE_MULTIPLIER;
@@ -197,6 +201,9 @@ export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath 
     // Fallback: draw wireframe skeleton if no model
     const group = skeletonGroupRef.current;
     if (!group) return;
+    
+    // Make skeleton visible when no model
+    group.visible = true;
     
     // Clear previous skeleton
     while (group.children.length > 0) {
