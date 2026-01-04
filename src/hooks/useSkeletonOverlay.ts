@@ -8,10 +8,9 @@ interface SkeletonOverlayProps {
   landmarks: HandLandmark[] | null;
   speciesId: string;
   modelPath?: string;
-  modelScale?: number;
 }
 
-export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath, modelScale = 0.3 }: SkeletonOverlayProps) {
+export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath }: SkeletonOverlayProps) {
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.OrthographicCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -160,8 +159,8 @@ export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath,
       // Rotate to align with hand orientation
       model.rotation.z = -(angle - Math.PI / 2);
       
-      // Scale based on hand size and configured scale
-      const dynamicScale = handSize * modelScale * 5;
+      // Scale based on hand size (models are pre-scaled correctly)
+      const dynamicScale = handSize * 5;
       model.scale.set(dynamicScale, dynamicScale, dynamicScale);
       
       return; // Don't draw wireframe when using model
@@ -280,7 +279,7 @@ export function useSkeletonOverlay({ canvasRef, landmarks, speciesId, modelPath,
       group.add(joint);
     });
 
-  }, [landmarks, speciesId, modelPath, modelScale]);
+  }, [landmarks, speciesId, modelPath]);
 
   // Animation loop
   useEffect(() => {
