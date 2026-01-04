@@ -70,14 +70,25 @@ export function CreditsOverlay({ isOpen, onClose }: CreditsOverlayProps) {
             <p className="text-xs text-primary">
               Designed for Educational Use
             </p>
-            <a
-              href="https://www.linkedin.com/in/eawilkinson/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
-            >
-              Built by Eric Wilkinson
-            </a>
+            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+              <a
+                href="https://www.linkedin.com/in/eawilkinson/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors"
+              >
+                Built by Eric Wilkinson
+              </a>
+              <span>•</span>
+              <a
+                href="https://lovable.dev/invite/ZHS1ZL2"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors"
+              >
+                Made with Lovable
+              </a>
+            </div>
           </div>
         </div>
       </div>
