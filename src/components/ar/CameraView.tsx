@@ -26,8 +26,11 @@ export function CameraView() {
   const [showDetail, setShowDetail] = useState(false);
   const [userScale, setUserScale] = useState(MODEL_CONFIG.DEFAULT_USER_SCALE);
   const [showScaleSlider, setShowScaleSlider] = useState(false);
-  const [isMirrored, setIsMirrored] = useState(MODEL_CONFIG.DEFAULT_MIRRORED);
-  const [showMirrorHint, setShowMirrorHint] = useState(true);
+  // Camera modes: 'phone' (right hand, no mirror), 'laptop-mirror' (right hand, mirrored), 'laptop-left' (left hand, no mirror)
+  const [cameraMode, setCameraMode] = useState<'phone' | 'laptop-mirror' | 'laptop-left'>('phone');
+  const [showModeHint, setShowModeHint] = useState(true);
+  
+  const isMirrored = cameraMode === 'laptop-mirror';
   
   const { isLoading, isTracking, landmarks, error } = useHandTracking(videoRef);
   
@@ -40,10 +43,10 @@ export function CameraView() {
     isMirrored,
   });
   
-  // Hide mirror hint after a few seconds
+  // Hide mode hint after a few seconds
   useEffect(() => {
     const timer = setTimeout(() => {
-      setShowMirrorHint(false);
+      setShowModeHint(false);
     }, 8000);
     return () => clearTimeout(timer);
   }, []);
@@ -146,32 +149,70 @@ export function CameraView() {
         <Home className="w-5 h-5 text-muted-foreground" />
       </button>
       
-      {/* Camera Mode Toggle */}
+      {/* Camera Mode Selector */}
       <div className="absolute top-4 left-16 z-10 flex items-center gap-2">
-        <button
-          onClick={() => {
-            setIsMirrored(!isMirrored);
-            setShowMirrorHint(false);
-          }}
-          className={`h-10 px-3 rounded-full backdrop-blur-sm flex items-center gap-2 border transition-colors ${
-            isMirrored 
-              ? 'bg-primary/20 border-primary/50 text-primary' 
-              : 'bg-secondary/80 border-border/50 text-muted-foreground hover:bg-secondary'
-          }`}
-        >
-          <FlipHorizontal2 className="w-4 h-4" />
-          <span className="text-xs">{isMirrored ? 'Laptop' : 'Phone'}</span>
-        </button>
+        <div className="flex rounded-full bg-secondary/80 backdrop-blur-sm border border-border/50 overflow-hidden">
+          <button
+            onClick={() => {
+              setCameraMode('phone');
+              setShowModeHint(false);
+            }}
+            className={`h-10 px-3 flex items-center gap-1 text-xs transition-colors ${
+              cameraMode === 'phone'
+                ? 'bg-primary/20 text-primary'
+                : 'text-muted-foreground hover:bg-secondary'
+            }`}
+          >
+            <span>📱</span>
+            <span className="hidden sm:inline">Phone</span>
+          </button>
+          <button
+            onClick={() => {
+              setCameraMode('laptop-mirror');
+              setShowModeHint(false);
+            }}
+            className={`h-10 px-3 flex items-center gap-1 text-xs border-l border-border/50 transition-colors ${
+              cameraMode === 'laptop-mirror'
+                ? 'bg-primary/20 text-primary'
+                : 'text-muted-foreground hover:bg-secondary'
+            }`}
+          >
+            <FlipHorizontal2 className="w-3 h-3" />
+            <span className="hidden sm:inline">Laptop</span>
+          </button>
+          <button
+            onClick={() => {
+              setCameraMode('laptop-left');
+              setShowModeHint(false);
+            }}
+            className={`h-10 px-3 flex items-center gap-1 text-xs border-l border-border/50 transition-colors ${
+              cameraMode === 'laptop-left'
+                ? 'bg-primary/20 text-primary'
+                : 'text-muted-foreground hover:bg-secondary'
+            }`}
+          >
+            <span>🤚</span>
+            <span className="hidden sm:inline">Left Hand</span>
+          </button>
+        </div>
         
-        {/* Hint for laptop users */}
-        {showMirrorHint && !isMirrored && (
-          <div className="bg-card/90 backdrop-blur-sm rounded-lg px-3 py-2 border border-border/50 animate-pulse">
+        {/* Hint for non-phone users */}
+        {showModeHint && cameraMode === 'phone' && (
+          <div className="bg-card/90 backdrop-blur-sm rounded-lg px-3 py-2 border border-border/50 animate-pulse max-w-[140px]">
             <p className="text-xs text-muted-foreground">
-              Using a laptop? <span className="text-primary">Tap here</span>
+              Using a <span className="text-primary">webcam</span>? Try other modes
             </p>
           </div>
         )}
       </div>
+      
+      {/* Left Hand Mode Guidance */}
+      {cameraMode === 'laptop-left' && !isTracking && (
+        <div className="absolute top-32 left-4 z-10 bg-card/90 backdrop-blur-sm rounded-lg px-4 py-3 border border-primary/30 max-w-[200px]">
+          <p className="text-sm text-foreground font-medium">Use your left hand</p>
+          <p className="text-xs text-muted-foreground mt-1">Palm facing the camera, fingers spread</p>
+        </div>
+      )}
       
       {/* Species Info Display */}
       <div className="absolute top-16 left-4 z-10">
