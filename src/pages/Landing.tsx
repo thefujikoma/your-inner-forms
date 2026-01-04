@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Hand, Move3D, Bone, ArrowRight } from "lucide-react";
+import { Hand, Move3D, Bone, ArrowRight, GraduationCap } from "lucide-react";
 import SilhouetteShowcase from "@/components/SilhouetteShowcase";
 
 export default function Landing() {
@@ -138,6 +138,32 @@ export default function Landing() {
             <br />
             They've been <span className="text-primary font-medium">reshaped</span>.
           </p>
+        </div>
+      </section>
+
+      {/* For Teachers Card */}
+      <section className="px-6 py-12">
+        <div className="max-w-2xl mx-auto">
+          <button
+            onClick={() => navigate("/classroom")}
+            className="group w-full bg-card border border-border rounded-2xl p-6 text-left hover:border-primary/50 hover:bg-card/80 transition-all duration-300"
+          >
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <GraduationCap className="w-6 h-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-semibold mb-2">Evolution in Action</h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  A guided classroom activity that connects forelimb anatomy, evolution, and creative scientific reasoning.
+                </p>
+                <div className="flex items-center gap-2 text-primary font-medium group-hover:gap-3 transition-all">
+                  <span>View Activity</span>
+                  <ArrowRight className="w-4 h-4" />
+                </div>
+              </div>
+            </div>
+          </button>
         </div>
       </section>
 
