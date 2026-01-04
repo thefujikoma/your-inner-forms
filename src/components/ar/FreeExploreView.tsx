@@ -13,27 +13,19 @@ import { useNavigate } from 'react-router-dom';
 import * as THREE from 'three';
 import { MODEL_CONFIG } from '@/constants/modelConfig';
 
-// GLB Model component
+// GLB Model component - Zero transforms to test raw Blender export
 function SpeciesModel({ modelPath }: { modelPath: string }) {
   const { scene } = useGLTF(modelPath);
-  const groupRef = useRef<THREE.Group>(null);
-  
-  useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.3) * 0.2;
-    }
-  });
 
   // Clone the scene to avoid issues with reusing
   const clonedScene = scene.clone();
   
   return (
-    <group ref={groupRef}>
-      <primitive 
-        object={clonedScene} 
-        rotation={[MODEL_CONFIG.BLENDER_ROTATION_X, 0, 0]} 
-      />
-    </group>
+    <primitive 
+      object={clonedScene} 
+      position={[0, 0, 0]}
+      rotation={[0, 0, 0]}
+    />
   );
 }
 
