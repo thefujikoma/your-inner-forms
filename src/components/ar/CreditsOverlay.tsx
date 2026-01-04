@@ -29,7 +29,7 @@ export function CreditsOverlay({ isOpen, onClose }: CreditsOverlayProps) {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-foreground tracking-wide">
-            Your Inner Hand
+            Your Inner Form
           </h3>
           <button
             onClick={onClose}
@@ -66,10 +66,18 @@ export function CreditsOverlay({ isOpen, onClose }: CreditsOverlayProps) {
             </button>
           </div>
           
-          <div className="pt-3 text-center">
+          <div className="pt-3 text-center space-y-2">
             <p className="text-xs text-primary">
               Designed for Educational Use
             </p>
+            <a
+              href="https://www.linkedin.com/in/eawilkinson/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+            >
+              Built by Eric Wilkinson
+            </a>
           </div>
         </div>
       </div>
